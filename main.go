@@ -10,25 +10,13 @@ import (
 )
 
 var roman = map[string]int{
-	"I":     1,
-	"II":    2,
-	"III":   3,
-	"IV":    4,
-	"V":     5,
-	"VI":    6,
-	"VII":   7,
-	"VIII":  8,
-	"IX":    9,
-	"X":     10,
-	"XI":    11,
-	"XII":   12,
-	"XIII":  13,
-	"XIV":   14,
-	"XV":    15,
-	"XVI":   16,
-	"XVII":  17,
-	"XVIII": 18,
-	"XIX":   19,
+	"I": 1,
+	"V": 5,
+	"X": 10,
+	"L": 50,
+	"C": 100,
+	"D": 500,
+	"M": 1000,
 }
 
 var count int
@@ -38,21 +26,43 @@ func Args(s []string) (int, int, error) {
 	var isRoman bool
 	var n1, n2 int
 	var err error
+	var lv, cv int
 
-	for i, v := range roman {
-		if s[0] == i {
+	for i := len(s[0]) - 1; i >= 0; i-- {
+		cv = roman[string(s[0][i])]
+
+		if cv != 0 {
 			isRoman = true
-			n1 = v
-			count++
+			count = 1
 		}
+
+		if cv < lv {
+			n1 -= cv
+		} else {
+			n1 += cv
+		}
+		lv = cv
 	}
+	lv = 0
 
-	for i, v := range roman {
-		if s[2] == i {
+	for i := len(s[2]) - 1; i >= 0; i-- {
+		cv = roman[string(s[2][i])]
+
+		if cv != 0 && count == 1 {
 			isRoman = true
-			n2 = v
-			count++
+			count = 2
+		} else if cv != 0 && count == 0 {
+			isRoman = true
+			count = 0
+			return 0, 0, errors.New("Числа должны быть одного вида")
 		}
+
+		if cv < lv {
+			n2 -= cv
+		} else {
+			n2 += cv
+		}
+		lv = cv
 	}
 
 	if !isRoman {
@@ -131,13 +141,39 @@ func main() {
 				if res <= 0 {
 					fmt.Println(errors.New("В римских цифрах нет отрицательных значений"))
 				}
-				for i, v := range roman {
-					if res == v {
-						resstr = i
+				for res != 0 {
+					if res-100 >= 0 {
+						resstr += "C"
+						res -= 100
+					} else if res-90 >= 0 {
+						resstr += "XC"
+						res -= 90
+					} else if res-50 >= 0 {
+						resstr += "L"
+						res -= 50
+					} else if res-40 >= 0 {
+						resstr += "XL"
+						res -= 40
+					} else if res-10 >= 0 {
+						resstr += "X"
+						res -= 10
+					} else if res-9 >= 0 {
+						resstr += "IX"
+						res -= 9
+					} else if res-5 >= 0 {
+						resstr += "V"
+						res -= 5
+					} else if res-4 >= 0 {
+						resstr += "IV"
+						res -= 4
+					} else if res-1 >= 0 {
+						resstr += "I"
+						res -= 1
 					}
 				}
 				fmt.Println(resstr)
 				count = 0
+				resstr = ""
 			} else {
 				fmt.Println(res)
 			}
